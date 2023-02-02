@@ -66,7 +66,7 @@ extern "C" const VisPluginInfo *get_plugin_info (int *count)
     info[0].plugname = (char*)"projectM";
     info[0].name = (char*)"libvisual projectM";
     info[0].author = (char*)"Peter Sperl";
-    info[0].version = (char*)"1.1";
+    info[0].version = (char*)PACKAGE_VERSION;
     info[0].about = (char*)"projectM";
     info[0].help =  (char*)"";
 

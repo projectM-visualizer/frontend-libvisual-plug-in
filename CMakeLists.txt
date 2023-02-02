@@ -26,6 +26,7 @@ add_library(projectM_libvisual MODULE
 
 target_compile_definitions(projectM_libvisual
         PRIVATE
+        PACKAGE_VERSION="${PROJECT_VERSION}"
         PROJECTM_PREFIX="${LIBPROJECTM_PREFIX}"
         )
 
