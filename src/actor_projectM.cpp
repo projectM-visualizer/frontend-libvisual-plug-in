@@ -11,7 +11,7 @@
 #include <sys/types.h>
 
 #include <libvisual/libvisual.h>
-#include <projectM.hpp>
+#include <libprojectM/projectM.hpp>
 #include "lvtoprojectM.h"
 #include "ConfigFile.h"
 
