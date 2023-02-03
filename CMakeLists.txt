@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.6)
 # - pkg_get_variable needs >=3.4
 # - pkg_check_modules([..] IMPORTED_TARGET [..]) needs >=3.6
 
-project(libvisual-projectm VERSION 2.1.0)
+project(libvisual-projectm VERSION 2.1.1)
 
 include(FindPkgConfig)
 
