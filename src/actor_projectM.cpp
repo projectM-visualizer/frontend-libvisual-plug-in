@@ -156,8 +156,16 @@ extern "C" int lv_projectm_dimension (VisPluginData *plugin, VisVideo *video, in
 	ProjectmPrivate *priv = (ProjectmPrivate*)visual_object_get_private (VISUAL_OBJECT (plugin));
 
 	visual_video_set_dimension (video, width, height);
+	
+	static int prev_width = 0;
+	static int prev_height = 0;
 
-	priv->PM->projectM_resetGL( width, height );
+	if (width != prev_width || height != prev_height) {
+		priv->PM->projectM_resetGL( width, height );
+
+		prev_width = width;
+		prev_height = height;
+	}
 
 	return 0;
 }
