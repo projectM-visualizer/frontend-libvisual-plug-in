@@ -189,12 +189,20 @@ extern "C" int lv_projectm_events (VisPluginData *plugin, VisEventQueue *events)
 	  {
 	    switch (ev.type)
 	      {
-	      case VISUAL_EVENT_KEYUP:
+	      case VISUAL_EVENT_KEYDOWN:
 
 		evt = lv2pmEvent( ev.type );
 		key = lv2pmKeycode( ev.event.keyboard.keysym.sym );
 		mod = lv2pmModifier( ev.event.keyboard.keysym.mod );
 		priv->PM->key_handler(PROJECTM_KEYDOWN, key,mod);
+
+		break;
+	      case VISUAL_EVENT_KEYUP:
+
+		evt = lv2pmEvent( ev.type );
+		key = lv2pmKeycode( ev.event.keyboard.keysym.sym );
+		mod = lv2pmModifier( ev.event.keyboard.keysym.mod );
+		priv->PM->key_handler(PROJECTM_KEYUP, key,mod);
 
 		break;
 	      case VISUAL_EVENT_RESIZE:
