@@ -121,10 +121,11 @@ extern "C" int lv_projectm_init (VisPluginData *plugin)
 extern "C" int lv_projectm_cleanup (VisPluginData *plugin)
 {
 	ProjectmPrivate *priv = (ProjectmPrivate*)visual_object_get_private (VISUAL_OBJECT (plugin));
+	visual_log_return_val_if_fail(priv != nullptr, -1);
 
 	/* Cleanup, and thus also free our private */
-	visual_mem_free (priv->PM);
-	visual_mem_free (priv);
+	delete priv->PM;
+	delete priv;
 	return 0;
 }
 
