@@ -11,7 +11,7 @@
 #include <sys/types.h>
 
 #include <libvisual/libvisual.h>
-#include <projectM.hpp>
+#include <libprojectM/projectM.hpp>
 #include "lvtoprojectM.h"
 #include "ConfigFile.h"
 
@@ -66,7 +66,7 @@ extern "C" const VisPluginInfo *get_plugin_info (int *count)
     info[0].plugname = (char*)"projectM";
     info[0].name = (char*)"libvisual projectM";
     info[0].author = (char*)"Peter Sperl";
-    info[0].version = (char*)"1.1";
+    info[0].version = (char*)PACKAGE_VERSION;
     info[0].about = (char*)"projectM";
     info[0].help =  (char*)"";
 
@@ -121,10 +121,11 @@ extern "C" int lv_projectm_init (VisPluginData *plugin)
 extern "C" int lv_projectm_cleanup (VisPluginData *plugin)
 {
 	ProjectmPrivate *priv = (ProjectmPrivate*)visual_object_get_private (VISUAL_OBJECT (plugin));
+	visual_log_return_val_if_fail(priv != nullptr, -1);
 
 	/* Cleanup, and thus also free our private */
-	visual_mem_free (priv->PM);
-	visual_mem_free (priv);
+	delete priv->PM;
+	delete priv;
 	return 0;
 }
 
@@ -156,8 +157,16 @@ extern "C" int lv_projectm_dimension (VisPluginData *plugin, VisVideo *video, in
 	ProjectmPrivate *priv = (ProjectmPrivate*)visual_object_get_private (VISUAL_OBJECT (plugin));
 
 	visual_video_set_dimension (video, width, height);
+	
+	static int prev_width = 0;
+	static int prev_height = 0;
 
-	priv->PM->projectM_resetGL( width, height );
+	if (width != prev_width || height != prev_height) {
+		priv->PM->projectM_resetGL( width, height );
+
+		prev_width = width;
+		prev_height = height;
+	}
 
 	return 0;
 }
@@ -180,12 +189,20 @@ extern "C" int lv_projectm_events (VisPluginData *plugin, VisEventQueue *events)
 	  {
 	    switch (ev.type)
 	      {
-	      case VISUAL_EVENT_KEYUP:
+	      case VISUAL_EVENT_KEYDOWN:
 
 		evt = lv2pmEvent( ev.type );
 		key = lv2pmKeycode( ev.event.keyboard.keysym.sym );
 		mod = lv2pmModifier( ev.event.keyboard.keysym.mod );
 		priv->PM->key_handler(PROJECTM_KEYDOWN, key,mod);
+
+		break;
+	      case VISUAL_EVENT_KEYUP:
+
+		evt = lv2pmEvent( ev.type );
+		key = lv2pmKeycode( ev.event.keyboard.keysym.sym );
+		mod = lv2pmModifier( ev.event.keyboard.keysym.mod );
+		priv->PM->key_handler(PROJECTM_KEYUP, key,mod);
 
 		break;
 	      case VISUAL_EVENT_RESIZE:
