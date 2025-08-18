@@ -57,7 +57,7 @@ jobs:
               clang-${{ matrix.clang_major_version }}
 
       - name: Checkout Git branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 'Configure with CMake'
         run: |-
