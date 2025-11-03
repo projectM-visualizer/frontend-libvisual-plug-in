@@ -19,8 +19,8 @@ jobs:
         include:
           - cc: gcc-12
             cxx: g++-12
-            clang_major_version: null
-            clang_repo_suffix: null
+            clang_major_version: ''
+            clang_repo_suffix: ''
             runs-on: ubuntu-22.04
           - cc: clang-17
             cxx: clang++-17
@@ -30,8 +30,23 @@ jobs:
           - cc: clang-18
             cxx: clang++-18
             clang_major_version: 18
-            clang_repo_suffix:
+            clang_repo_suffix: -18
             runs-on: ubuntu-22.04
+          - cc: gcc-14
+            cxx: g++-14
+            clang_major_version: ''
+            clang_repo_suffix: ''
+            runs-on: ubuntu-24.04
+          - cc: clang-20
+            cxx: clang++-20
+            clang_major_version: 20
+            clang_repo_suffix: -20
+            runs-on: ubuntu-24.04
+          - cc: clang-21
+            cxx: clang++-21
+            clang_major_version: 21
+            clang_repo_suffix: -21
+            runs-on: ubuntu-24.04
     steps:
       - name: Add Clang/LLVM repositories
         if: "${{ contains(matrix.cxx, 'clang') }}"
@@ -39,14 +54,17 @@ jobs:
           set -x
           source /etc/os-release
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}${{ matrix.clang_repo_suffix }} main"
+          sudo add-apt-repository "deb https://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}${{ matrix.clang_repo_suffix }} main"
 
       - name: Install build dependencies
         run: |-
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
             cmake \
-            libprojectm-dev \
+            ninja-build \
+            build-essential \
+            libgl1-mesa-dev \
+            mesa-common-dev \
             libvisual-0.4-dev \
             pkg-config
 
@@ -56,16 +74,41 @@ jobs:
           sudo apt-get install --yes --no-install-recommends -V \
               clang-${{ matrix.clang_major_version }}
 
+      - name: Checkout libprojectM Sources
+        uses: actions/checkout@v4
+        with:
+          repository: projectM-visualizer/projectm
+          path: libprojectM
+          submodules: recursive
+
+      - name: Build/Install libprojectM
+        run: |
+          mkdir cmake-build-libprojectM
+          cmake -G Ninja -S libprojectM -B "${{ github.workspace }}/cmake-build-libprojectM"  \
+            -DCMAKE_C_COMPILER="${{ matrix.cc }}" \
+            -DCMAKE_CXX_COMPILER="${{ matrix.cxx }}" \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install-libprojectM"
+          cmake --build "${{ github.workspace }}/cmake-build-libprojectM" --parallel
+          cmake --install "${{ github.workspace }}/cmake-build-libprojectM"
+
       - name: Checkout Git branch
         uses: actions/checkout@v4
+        with:
+          path: libvisual-projectm
 
       - name: 'Configure with CMake'
         run: |-
           cmake_args=(
             -DCMAKE_C_COMPILER="${{ matrix.cc }}"
             -DCMAKE_CXX_COMPILER="${{ matrix.cxx }}"
-            -S ./
-            -B build/
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install-libprojectM"
+            -DCMAKE_VERBOSE_MAKEFILE=ON
+            -S "${{ github.workspace }}/libvisual-projectm"
+            -B "${{ github.workspace }}/cmake-build-libvisual-projectm"
           )
           set -x
           cmake "${cmake_args[@]}"
@@ -73,10 +116,10 @@ jobs:
       - name: 'Build'
         run: |-
           set -x
-          make -C build -j$(nproc) VERBOSE=1
+          cmake --build "${{ github.workspace }}/cmake-build-libvisual-projectm" --parallel
 
       - name: 'Install'
         run: |-
           set -x -o pipefail
-          make -C build install DESTDIR="${PWD}"/ROOT/
-          find ROOT/ | sort | xargs ls -ld
+          cmake --install "${{ github.workspace }}/cmake-build-libvisual-projectm" --prefix "${{ github.workspace }}/ROOT/"
+          find "${{ github.workspace }}/ROOT/" | sort | xargs ls -ld

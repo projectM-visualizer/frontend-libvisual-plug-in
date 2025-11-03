@@ -12,7 +12,9 @@ include(FindPkgConfig)
 
 pkg_check_modules(LIBVISUAL libvisual-0.4 REQUIRED IMPORTED_TARGET)
 pkg_get_variable(LIBVISUAL_PLUGINS_BASE_DIR libvisual-0.4 pluginsbasedir)
-set(LIBVISUAL_ACTOR_PLUGINS_DIR "${LIBVISUAL_PLUGINS_BASE_DIR}/actor")
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${LIBVISUAL_PLUGINS_BASE_DIR}")
+endif()
 
 find_package(projectM4 REQUIRED COMPONENTS Playlist)
 
@@ -39,7 +41,8 @@ set_target_properties(actor_projectM PROPERTIES
 )
 
 install(TARGETS actor_projectM
-    LIBRARY DESTINATION "${LIBVISUAL_ACTOR_PLUGINS_DIR}"
+    LIBRARY DESTINATION "actor/"
+    RUNTIME DESTINATION "actor/"
 )
 
 get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
