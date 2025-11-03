@@ -1,12 +1,9 @@
 # Copyright (c) 2023 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under GPL v3 or later
 
-cmake_minimum_required(VERSION 3.6)
-# CMake features used that need more than CMake 3.0:
-# - pkg_get_variable needs >=3.4
-# - pkg_check_modules([..] IMPORTED_TARGET [..]) needs >=3.6
+cmake_minimum_required(VERSION 3.21)
 
-project(libvisual-projectm VERSION 2.1.1)
+project(libvisual-projectm VERSION 2.1.2)
 
 include(FindPkgConfig)
 
