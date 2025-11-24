@@ -75,7 +75,7 @@ jobs:
               clang-${{ matrix.clang_major_version }}
 
       - name: Checkout libprojectM Sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: projectM-visualizer/projectm
           path: libprojectM
@@ -95,7 +95,7 @@ jobs:
           cmake --install "${{ github.workspace }}/cmake-build-libprojectM"
 
       - name: Checkout Git branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: libvisual-projectm
 
